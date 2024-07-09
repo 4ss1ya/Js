@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Магазин</title>
+<!--css-->
+<style>
+#cart h2 {
+  font-size: 28px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 0;
+}
+#clear-cart {
+  background-color: #f44336;
+  color: white;
+}
+#total {
+  font-size: 24px;
+  text-align: right;
+  margin-top: 20px;
+  font-weight: bold;
+}
+#products li a {
+  text-decoration: none;
+  color: #333;
+  transition: color 0.3s ease;
+}
+
+#products li a:hover {
+  color: #4CAF50;
+}
+#products li:hover {
+  background-color: #f0f0f0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+h1 {
+  text-align: center;
+  margin-top: 50px;
+  font-size: 36px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  background-color: #fff;
+  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.3);
+  padding: 20px;
+}
+
+li img {
+  width: 150px;
+  margin-right: 20px;
+}
+
+button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin-left: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #3e8e41;
+}
+
+/* Стиль для корзины */
+#cart {
+  border: 1px solid #ccc;
+  padding: 20px;
+  margin-top: 50px;
+  background-color: #fff;
+  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.3);
+}
+
+#cart li {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: #f5f5f5;
+  margin-bottom: 10px;
+}
+#cart li img {
+width: 100px;
+margin-right: 10px;
+}
+
+#cart li span {
+flex-grow: 1;
+}
+
+#cart li button {
+margin-left: auto;
+}
+
+#cart h2 {
+text-align: center;
+margin-bottom: 20px;
+}
+
+#cart p {
+text-align: center;
+margin-top: 20px;
+}
+
+#cart button {
+display: block;
+margin: 20px auto 0;
+}
+</style>
+</head>
+<body>
+	<h1>Jewel</h1>
+
+	<!-- Список товаров -->
+	<ul id="products">
+		<li data-id="0" data-name="Браслет из бисера молочного цвета" data-price="2000">
+			<img src="IMG_7815.PNG" alt="Товар 1">
+			Браслет из бисера молочного цвета - 2000 KZT
+		</li>
+		<li data-id="1" data-name="Сумочка в виде аксессуара" data-price="5000">
+			<img src="IMG_7816.PNG" alt="Товар 2">
+			Сумочка в виде аксессуара - 5000 KZT
+		</li>
+		<li data-id="2" data-name="Хрустальный браслет" data-price="2000">
+			<img src="IMG_7817.PNG" alt="Товар 3">
+			Хрустальный браслет - 2000 KZT
+		</li>
+		<li data-id="3" data-name="Браслет из жемчуга" data-price="2000">
+			<img src="IMG_7818.PNG" alt="Товар 4">
+			Браслет из жемчуга - 2000 KZT
+		</li>
+		<li data-id="4" data-name="Коралловая хрустальная сумочка" data-price="20000">
+			<img src="IMG_7819.PNG" alt="Товар 5">
+			Коралловая хрустальная сумочка - 20000 KZT
+		</li>
+		<li data-id="5" data-name="Карамельная хрустальная сумочка" data-price="20000">
+			<img src="IMG_7820.PNG" alt="Товар 6">
+			Карамельная хрустальная сумочка - 20000 KZT
+		</li>
+	</ul>
+
+	<!-- Корзина -->
+	<h2>Корзина</h2>
+	<ul id="cart"></ul>
+	<p id="total">Итого: 0 KZT</p>
+
+	<!-- Кнопка очистки корзины -->
+	<button id="clear-cart">Очистить корзину</button>
+
+	<!--script -->
+	<script>
+		//массив для img товаров,чтобы выводилось в корзине
+		const imageArray = ['IMG_7815.PNG','IMG_7816.PNG','IMG_7817.PNG','IMG_7818.PNG','IMG_7819.PNG','IMG_7820.PNG']
+		// ссылки на элементы на странице
+		const productsList = document.getElementById('products');
+		const cart = document.getElementById('cart');
+		const clearCartBtn = document.getElementById('clear-cart');
+		const total = document.getElementById('total');
+
+		//обработчик клика на список товаров
+		productsList.addEventListener('click', addToCart);
+
+		//обработчик клика на кнопку очистки корзины
+		clearCartBtn.addEventListener('click', clearCart);
+
+		// обработчик клика на кнопки удаления товара из корзины
+		cart.addEventListener('click', removeFromCart);
+
+		// добавление товара в корзину
+		function addToCart(event) {
+			if (event.target.tagName === 'IMG') {
+				// Находим родительский элемент, который содержит данные о товаре
+				const product = event.target.closest('li');
+
+				// Получение данных о товаре
+				const id = product.dataset.id;
+				const name = product.dataset.name;
+				const price = +product.dataset.price;
+
+				// Проверка, есть ли уже этот товар в корзине
+				const existingCartItem = cart.querySelector(`[data-id="${id}"]`);
+				if (existingCartItem) {
+					// товар уже есть в корзине, тогда увеличиваем его количество
+					const quantity = +existingCartItem.dataset.quantity + 1;
+					existingCartItem.dataset.quantity = quantity;
+					existingCartItem.querySelector('.quantity').textContent = quantity;
+				} else {
+				// Если нет в корзине, добавляем новый элемент
+				const cartItem = document.createElement('li');
+				cartItem.dataset.id = id;
+				cartItem.dataset.name = name;
+				cartItem.dataset.price = price;
+				cartItem.dataset.quantity = 1;
+
+				cartItem.innerHTML = `
+					<img src="${imageArray[id]}" alt="${name}">
+					${name} - ${price} KZT x <span class="quantity">1</span>
+					<button class="remove-btn">Удалить</button>`;
+
+				cart.appendChild(cartItem);
+			}
+
+			// Обновляем  общую сумму заказа
+			updateTotal();
+		}
+	}
+
+	// удаление товара из корзины
+	function removeFromCart(event) {
+		if (event.target.classList.contains('remove-btn')) {
+			// Находим элемент корзины, который нужно удалить
+			const cartItem = event.target.closest('li');
+
+			// Удаляем элемент из корзины
+			cart.removeChild(cartItem);
+
+
+			updateTotal();
+		}
+	}
+
+	// очистка корзины
+	function clearCart() {
+		// Удаляем все товары из корзины
+		cart.innerHTML = '';
+
+	
+		updateTotal();
+	}
+
+	// Функция обновления суммы заказа
+	function updateTotal() {
+		// Получаем все элементы корзины
+		const cartItems = cart.querySelectorAll('li');
+
+		// Считаем итоговую сумму 
+		let totalSum = 0;
+		for (let i = 0; i < cartItems.length; i++) {
+			const quantity = +cartItems[i].dataset.quantity;
+			const price = +cartItems[i].dataset.price;
+			totalSum += quantity * price;
+		}
+
+		// Обновляем текст элемента с итоговой суммой
+		total.textContent = `Итого: ${totalSum} KZT`;
+	}
+</script>
+</body>
+</html>
+
